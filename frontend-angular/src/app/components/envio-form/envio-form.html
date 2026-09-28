@@ -1,0 +1,25 @@
+<h2>Registrar nuevo envío</h2>
+<form #f="ngForm" (ngSubmit)="guardar()">
+  <label>Código de rastreo (formato EXP-1234)
+    <input name="codigo" [(ngModel)]="payload.codigoRastreo" pattern="^EXP-\d{4}$" required />
+  </label>
+  <label>Dirección de destino
+    <input name="direccion" [(ngModel)]="payload.direccionDestino" required />
+  </label>
+  <label>Peso (kg)
+    <input name="peso" type="number" min="0.01" step="0.01" [(ngModel)]="payload.pesoKg" required />
+  </label>
+  <label>Costo
+    <input name="costo" type="number" min="0.01" step="0.01" [(ngModel)]="payload.costo" required />
+  </label>
+  <label>ID de vehículo
+    <input name="vehiculoId" type="number" min="1" [(ngModel)]="payload.vehiculoId" required />
+  </label>
+  <label>ID de conductor
+    <input name="conductorId" type="number" min="1" [(ngModel)]="payload.conductorId" required />
+  </label>
+  <button type="submit" [disabled]="f.invalid">Registrar</button>
+</form>
+
+@if (mensaje) { <p class="ok">{{ mensaje }}</p> }
+@if (error) { <p class="error">{{ error }}</p> }

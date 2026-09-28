@@ -1,0 +1,7 @@
+form { display: flex; flex-direction: column; gap: 14px; max-width: 420px; }
+label { display: flex; flex-direction: column; gap: 4px; }
+input { padding: 8px; }
+button { padding: 10px; background: #3b82f6; color: #fff; border: 0; cursor: pointer; }
+button:disabled { background: #94a3b8; cursor: not-allowed; }
+.ok { color: #15803d; }
+.error { color: #b91c1c; }

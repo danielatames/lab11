@@ -1,0 +1,22 @@
+<h2>Rastrear guía</h2>
+<div class="buscador">
+  <input [(ngModel)]="codigo" placeholder="Ej: EXP-1234" (keyup.enter)="buscar()" />
+  <button (click)="buscar()" [disabled]="!codigo.trim()">Buscar</button>
+</div>
+
+@if (error) { <p class="error">{{ error }}</p> }
+
+@if (envio) {
+  <div class="ficha">
+    <h3>{{ envio.codigoRastreo }}</h3>
+    <p><b>Dirección:</b> {{ envio.direccionDestino }}</p>
+    <p><b>Peso:</b> {{ envio.pesoKg }} kg</p>
+    <p><b>Costo:</b> {{ envio.costo }}</p>
+    <p><b>Vehículo:</b> {{ envio.placaVehiculo }}</p>
+    <p><b>Conductor:</b> {{ envio.nombreConductor }}</p>
+    <p><b>Estado:</b> {{ envio.estadoEnvio }}</p>
+    <div class="barra">
+      <div class="relleno" [style.width.%]="progreso" [class.cancelado]="envio.estadoEnvio === 'CANCELADO'"></div>
+    </div>
+  </div>
+}

@@ -1,0 +1,33 @@
+<h2>Guías de envío</h2>
+@if (error) { <p class="error">{{ error }}</p> }
+
+<table>
+  <thead>
+    <tr>
+      <th>Código</th><th>Dirección</th><th>Peso (kg)</th>
+      <th>Costo</th><th>Estado</th><th>Vehículo</th><th>Conductor</th><th>Cambiar estado</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (e of envios; track e.id) {
+      <tr>
+        <td>{{ e.codigoRastreo }}</td>
+        <td>{{ e.direccionDestino }}</td>
+        <td>{{ e.pesoKg }}</td>
+        <td>{{ e.costo }}</td>
+        <td><span class="badge" [class]="e.estadoEnvio.toLowerCase()">{{ e.estadoEnvio }}</span></td>
+        <td>{{ e.placaVehiculo }}</td>
+        <td>{{ e.nombreConductor }}</td>
+        <td>
+          @if (auth.hasRole('ROLE_ADMIN') || auth.hasRole('ROLE_CONDUCTOR')) {
+            <select [value]="e.estadoEnvio" (change)="cambiarEstado(e, $any($event.target).value)">
+              @for (s of estados; track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          }
+        </td>
+      </tr>
+    } @empty {
+      <tr><td colspan="8">No hay envíos registrados.</td></tr>
+    }
+  </tbody>
+</table>

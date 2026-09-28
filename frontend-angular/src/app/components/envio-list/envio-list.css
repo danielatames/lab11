@@ -1,0 +1,9 @@
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+th { background: #f1f5f9; }
+.badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: #fff; }
+.pendiente { background: #eab308; }
+.en_transito { background: #3b82f6; }
+.entregado { background: #22c55e; }
+.cancelado { background: #ef4444; }
+.error { color: #b91c1c; }

@@ -1,0 +1,7 @@
+<h2>Iniciar sesión — ExpresoFast</h2>
+<form (ngSubmit)="ingresar()">
+  <label>Usuario <input name="username" [(ngModel)]="username" required /></label>
+  <label>Contraseña <input name="password" type="password" [(ngModel)]="password" required /></label>
+  <button type="submit">Ingresar</button>
+</form>
+@if (error) { <p class="error">{{ error }}</p> }
