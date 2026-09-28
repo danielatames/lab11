@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpresoFast — Consola Paginada</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="header-logo">
+            <span aria-hidden="true"></span>
+            <span>ExpresoFast — Vista Paginada</span>
+        </div>
+        <div class="header-usuario">
+            <span id="nombreUsuario"></span>
+            <a href="dashboard.html" class="link-volver"> Volver al panel</a>
+            <button id="btnLogout" type="button">Cerrar sesión</button>
+        </div>
+    </header>
+
+    <main class="app-main-paginado">
+
+        <section class="filtros-paginado" aria-label="Filtros de búsqueda">
+            <div class="campo-filtro">
+                <label for="inputBusqueda">Buscar (código o destinatario)</label>
+                <input type="text" id="inputBusqueda" placeholder="EXP-0001 o nombre...">
+            </div>
+
+            <div class="campo-filtro">
+                <label for="selectEstado">Estado</label>
+                <select id="selectEstado">
+                    <option value="">Todos</option>
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="EN_TRANSITO">En Tránsito</option>
+                    <option value="ENTREGADO">Entregado</option>
+                    <option value="CANCELADO">Cancelado</option>
+                </select>
+            </div>
+
+            <div class="campo-filtro">
+                <label for="selectTamanoPagina">Registros por página</label>
+                <select id="selectTamanoPagina">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                </select>
+            </div>
+
+            <button type="button" id="btnBuscar">Buscar</button>
+            <button type="button" id="btnProcedimiento">Usar Stored Procedure</button>
+        </section>
+
+        <div
+            id="alertaErroresPaginado"
+            class="alerta-error"
+            role="alert"
+            aria-live="assertive"
+            hidden>
+        </div>
+
+        <table class="tabla-envios" aria-label="Tabla de envíos paginada">
+            <thead>
+                <tr>
+                    <th scope="col">Código</th>
+                    <th scope="col">Destinatario</th>
+                    <th scope="col">Destino</th>
+                    <th scope="col">Monto Flete</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Fecha Creación</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTabla">
+            </tbody>
+        </table>
+
+        <nav class="paginacion" aria-label="Controles de paginación">
+            <button type="button" id="btnPrimera">« Primera</button>
+            <button type="button" id="btnAnterior">‹ Anterior</button>
+            <span id="infoPagina">Página 1 de 1</span>
+            <button type="button" id="btnSiguiente">Siguiente ›</button>
+            <button type="button" id="btnUltima">Última »</button>
+        </nav>
+
+    </main>
+
+    <script src="app.js"></script>
+    <script src="paginacion.js"></script>
+</body>
+</html>
