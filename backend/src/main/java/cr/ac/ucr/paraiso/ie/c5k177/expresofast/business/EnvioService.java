@@ -1,0 +1,219 @@
+package cr.ac.ucr.paraiso.ie.c5k177.expresofast.business;
+
+import cr.ac.ucr.paraiso.ie.c5k177.expresofast.data.*;
+import cr.ac.ucr.paraiso.ie.c5k177.expresofast.domain.*;
+import cr.ac.ucr.paraiso.ie.c5k177.expresofast.dto.*;
+import cr.ac.ucr.paraiso.ie.c5k177.expresofast.exception.CapacidadExcedidaException;
+import cr.ac.ucr.paraiso.ie.c5k177.expresofast.exception.InvalidStateTransitionException;
+import cr.ac.ucr.paraiso.ie.c5k177.expresofast.exception.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+public class EnvioService {
+
+    private final EnvioRepository envioRepository;
+    private final VehiculoRepository vehiculoRepository;
+    private final ConductorRepository conductorRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final BitacoraEnvioRepository bitacoraEnvioRepository;
+
+    private static final Set<String> ESTADOS_FINALES = Set.of("ENTREGADO", "CANCELADO");
+    private static final Set<String> ESTADOS_RETROCESO = Set.of("PENDIENTE", "EN_TRANSITO");
+
+    public EnvioService(EnvioRepository envioRepository,
+            VehiculoRepository vehiculoRepository,
+            ConductorRepository conductorRepository,
+            UsuarioRepository usuarioRepository,
+            BitacoraEnvioRepository bitacoraEnvioRepository) {
+        this.envioRepository = envioRepository;
+        this.vehiculoRepository = vehiculoRepository;
+        this.conductorRepository = conductorRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.bitacoraEnvioRepository = bitacoraEnvioRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<EnvioResponseDTO> listarOptimizado() {
+        return envioRepository.findAllOptimizado().stream()
+                .map(this::mapearAResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public EnvioResponseDTO obtenerPorId(Integer id) {
+        Envio envio = envioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Envio no encontrado"));
+        return mapearAResponseDTO(envio);
+    }
+
+    @Transactional(readOnly = true)
+    public EnvioResponseDTO obtenerPorCodigo(String codigoRastreo) {
+        Envio envio = envioRepository.findByCodigoRastreo(codigoRastreo)
+                .orElseThrow(() -> new ResourceNotFoundException("Envío no encontrado"));
+        return mapearAResponseDTO(envio);
+    }
+
+    @Transactional
+    public EnvioResponseDTO registrarEnvio(EnvioRequestDTO dto) {
+        Vehiculo vehiculo = vehiculoRepository.findById(dto.getVehiculoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Vehículo no encontrado"));
+
+        Conductor conductor = conductorRepository.findById(dto.getConductorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Conductor no encontrado"));
+
+        if (dto.getPesoKg().compareTo(vehiculo.getCapacidadKg()) > 0) {
+            throw new CapacidadExcedidaException("El peso del envío (" + dto.getPesoKg()
+                    + " kg) supera la capacidad del vehículo (" + vehiculo.getCapacidadKg() + " kg)");
+        }
+
+        Envio envio = new Envio();
+        envio.setCodigoRastreo(dto.getCodigoRastreo());
+        envio.setDireccionDestino(dto.getDireccionDestino());
+        envio.setPesoKg(dto.getPesoKg());
+        envio.setCosto(dto.getCosto());
+        envio.setVehiculo(vehiculo);
+        envio.setConductor(conductor);
+        envio.setEstadoEnvio("PENDIENTE");
+
+        Envio guardado = envioRepository.save(envio);
+        return mapearAResponseDTO(guardado);
+    }
+
+    @Transactional
+    public EnvioResponseDTO actualizarEstado(Integer envioId, CambioEstadoDTO dto) {
+        Envio envio = envioRepository.findById(envioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Envío no encontrado"));
+
+        String estadoAnterior = envio.getEstadoEnvio();
+        String estadoNuevo = dto.getNuevoEstado();
+
+        if (ESTADOS_FINALES.contains(estadoAnterior) && ESTADOS_RETROCESO.contains(estadoNuevo)) {
+            throw new InvalidStateTransitionException(
+                    "Transición de estado no permitida para el envío " + envio.getCodigoRastreo());
+        }
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        envio.setEstadoEnvio(estadoNuevo);
+
+        BitacoraEnvio bitacora = new BitacoraEnvio();
+        bitacora.setEnvio(envio);
+        bitacora.setEstadoAnterior(estadoAnterior);
+        bitacora.setEstadoNuevo(estadoNuevo);
+        bitacora.setFechaCambio(LocalDateTime.now());
+        bitacora.setUsuario(usuario);
+        bitacora.setObservaciones(dto.getObservaciones());
+        bitacoraEnvioRepository.save(bitacora);
+
+        return mapearAResponseDTO(envio);
+    }
+
+    @Transactional
+    public EnvioResponseDTO cancelarEnvio(Integer envioId) {
+        Envio envio = envioRepository.findById(envioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Envío no encontrado"));
+
+        if ("EN_TRANSITO".equals(envio.getEstadoEnvio())) {
+            throw new InvalidStateTransitionException(
+                    "No se puede cancelar el envío " + envio.getCodigoRastreo()
+                            + " porque ya se encuentra en tránsito");
+        }
+        if (ESTADOS_FINALES.contains(envio.getEstadoEnvio())) {
+            throw new InvalidStateTransitionException(
+                    "El envío " + envio.getCodigoRastreo() + " ya se encuentra en un estado final");
+        }
+
+        envio.setEstadoEnvio("CANCELADO");
+        return mapearAResponseDTO(envio);
+    }
+
+    @Transactional(readOnly = true)
+    public List<BitacoraResponseDTO> obtenerBitacora(Integer envioId) {
+        if (!envioRepository.existsById(envioId)) {
+            throw new ResourceNotFoundException("Envío no encontrado");
+        }
+
+        return bitacoraEnvioRepository.findByEnvioIdOrderByFechaCambioDesc(envioId).stream()
+                .map(b -> new BitacoraResponseDTO(
+                        b.getId(),
+                        b.getEstadoAnterior(),
+                        b.getEstadoNuevo(),
+                        b.getFechaCambio(),
+                        b.getUsuario().getNombreCompleto(),
+                        b.getObservaciones()))
+                .collect(Collectors.toList());
+    }
+
+    private EnvioResponseDTO mapearAResponseDTO(Envio envio) {
+        return new EnvioResponseDTO(
+                envio.getId(),
+                envio.getCodigoRastreo(),
+                envio.getDireccionDestino(),
+                envio.getPesoKg(),
+                envio.getCosto(),
+                envio.getEstadoEnvio(),
+                envio.getVehiculo().getPlaca(),
+                envio.getConductor().getNombre() + " " + envio.getConductor().getApellidos(),
+                envio.getFechaCreacion(),
+                envio.getFechaModificacion());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<EnvioDTO> listarPaginado(int page, int size, String sortBy, String direction,
+            String busqueda, String estado) {
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Envio> enviosPage;
+
+        boolean tieneBusqueda = (busqueda != null && !busqueda.trim().isEmpty());
+        boolean tieneEstado = (estado != null && !estado.trim().isEmpty());
+
+        if (tieneBusqueda && tieneEstado) {
+            enviosPage = envioRepository
+                    .findByCodigoRastreoContainingIgnoreCaseOrDestinatarioContainingIgnoreCaseAndEstadoEnvio(
+                            busqueda, busqueda, estado, pageable);
+        } else if (tieneBusqueda) {
+            enviosPage = envioRepository
+                    .findByCodigoRastreoContainingIgnoreCaseOrDestinatarioContainingIgnoreCase(
+                            busqueda, busqueda, pageable);
+        } else if (tieneEstado) {
+            enviosPage = envioRepository.findByEstadoEnvio(estado, pageable);
+        } else {
+            enviosPage = envioRepository.findAll(pageable);
+        }
+
+        return enviosPage.map(this::mapearAEnvioDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EnvioDTO> listarViaStoredProcedure(String estado) {
+        return envioRepository.obtenerEnviosPorEstado(estado).stream()
+                .map(this::mapearAEnvioDTO)
+                .collect(Collectors.toList());
+    }
+
+    private EnvioDTO mapearAEnvioDTO(Envio envio) {
+        return new EnvioDTO(
+                envio.getId(),
+                envio.getCodigoRastreo(),
+                envio.getDestinatario(),
+                envio.getDireccionDestino(),
+                envio.getCosto(),
+                envio.getEstadoEnvio(),
+                envio.getFechaCreacion());
+    }
+}
