@@ -1,0 +1,18 @@
+form { display: flex; flex-direction: column; gap: 16px; max-width: 640px; margin: 0 auto; }fieldset { background: #fff; border: 1px solid var(--rosa-borde); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+legend { font-weight: bold; padding: 0 6px; color: var(--rosa-oscuro); }
+label { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+input { padding: 8px; }
+.fila { display: flex; gap: 12px; }
+.paquete { display: flex; gap: 10px; align-items: flex-start; background: var(--rosa-fondo); border: 1px dashed var(--rosa-borde); padding: 10px; border-radius: 6px; }
+.paquete .num { font-weight: bold; color: var(--rosa); padding-top: 26px; }
+button { padding: 10px; background: var(--rosa); color: #fff; border: 0; cursor: pointer; border-radius: 6px; }
+button:hover:not(:disabled) { background: var(--rosa-hover); }
+button:disabled { background: #d8b4c8; cursor: not-allowed; }
+.quitar { background: #ef4444; margin-top: 22px; padding: 8px 12px; }
+.quitar:hover:not(:disabled) { background: #dc2626; }
+.agregar { background: #fff; color: var(--rosa); border: 2px solid var(--rosa); align-self: flex-start; }
+.agregar:hover { background: var(--rosa-claro); }
+.error { color: #b91c1c; font-size: 13px; }
+.error.global { background: #fee2e2; border-left: 4px solid #b91c1c; padding: 8px; border-radius: 4px; margin: 0; }
+.info { color: var(--rosa); font-size: 13px; }
+.ok { color: #15803d; }h2 { text-align: center; }

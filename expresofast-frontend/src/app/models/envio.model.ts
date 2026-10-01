@@ -19,3 +19,19 @@ export interface CrearEnvioPayload {
   vehiculoId: number;
   conductorId: number;
 }
+export interface PaquetePayload {
+  descripcion: string;
+  pesoKg: number;
+}
+
+export interface EnvioRegistroPayload {
+  numeroTracking: string;
+  destinatario: string;
+  direccionDestino: string;
+  montoFlete: number;
+  fechaDespacho: string;        
+  fechaEntregaEstimada: string;   
+  vehiculoId: number;
+  conductorId: number;
+  paquetes: PaquetePayload[];
+}

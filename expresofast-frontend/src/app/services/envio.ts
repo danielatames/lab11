@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Envio, CrearEnvioPayload } from '../models/envio.model';
+import { Envio, CrearEnvioPayload, EnvioRegistroPayload } from '../models/envio.model';
 
 @Injectable({ providedIn: 'root' })
 export class EnvioService {
@@ -19,5 +20,15 @@ export class EnvioService {
   }
   actualizarEstado(id: number, nuevoEstado: string) {
     return this.http.patch<Envio>(`${this.base}/${id}/estado`, { nuevoEstado });
+  }
+
+  crearEnvioAvanzado(payload: EnvioRegistroPayload): Observable<Envio> {
+    return this.http.post<Envio>(`${this.base}/avanzado`, payload);
+  }
+
+  checkTracking(numeroTracking: string): Observable<{ existe: boolean }> {
+    return this.http.get<{ existe: boolean }>(
+      `${this.base}/check-tracking/${encodeURIComponent(numeroTracking)}`
+    );
   }
 }

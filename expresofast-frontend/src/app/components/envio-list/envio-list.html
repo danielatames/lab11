@@ -15,13 +15,15 @@
         <td>{{ e.direccionDestino }}</td>
         <td>{{ e.pesoKg }}</td>
         <td>{{ e.costo }}</td>
-        <td><span class="badge" [class]="e.estadoEnvio.toLowerCase()">{{ e.estadoEnvio }}</span></td>
+        <td><span [class]="'badge ' + e.estadoEnvio.toLowerCase()">{{ e.estadoEnvio }}</span></td>
         <td>{{ e.placaVehiculo }}</td>
         <td>{{ e.nombreConductor }}</td>
         <td>
           @if (auth.hasRole('ROLE_ADMIN') || auth.hasRole('ROLE_CONDUCTOR')) {
-            <select [value]="e.estadoEnvio" (change)="cambiarEstado(e, $any($event.target).value)">
-              @for (s of estados; track s) { <option [value]="s">{{ s }}</option> }
+            <select (change)="cambiarEstado(e, $any($event.target).value)">
+              @for (s of estados; track s) {
+                <option [value]="s" [selected]="s === e.estadoEnvio">{{ s }}</option>
+              }
             </select>
           }
         </td>

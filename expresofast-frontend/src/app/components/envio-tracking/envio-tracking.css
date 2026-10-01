@@ -1,8 +1,10 @@
 .buscador { display: flex; gap: 8px; margin-bottom: 16px; }
 input { padding: 8px; flex: 1; max-width: 320px; }
-button { padding: 8px 16px; background: #3b82f6; color: #fff; border: 0; cursor: pointer; }
-.ficha { border: 1px solid #e2e8f0; padding: 16px; max-width: 480px; border-radius: 8px; }
-.barra { background: #e2e8f0; height: 14px; border-radius: 7px; overflow: hidden; }
-.relleno { background: #22c55e; height: 100%; transition: width 0.4s; }
+button { padding: 8px 16px; background: var(--rosa); color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
+button:hover:not(:disabled) { background: var(--rosa-hover); }
+button:disabled { background: #d8b4c8; cursor: not-allowed; }
+.ficha { background: #fff; border: 1px solid var(--rosa-borde); padding: 16px; max-width: 480px; border-radius: 8px; }
+.barra { background: var(--rosa-claro); height: 14px; border-radius: 7px; overflow: hidden; }
+.relleno { background: var(--rosa); height: 100%; transition: width 0.4s; }
 .relleno.cancelado { background: #ef4444; width: 100% !important; }
 .error { color: #b91c1c; }

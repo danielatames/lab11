@@ -1,7 +1,7 @@
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-th { background: #f1f5f9; }
-.badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: #fff; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; }
+th, td { padding: 10px; border-bottom: 1px solid var(--rosa-claro); text-align: left; }
+th { background: var(--rosa-claro); color: var(--rosa-oscuro); }
+.badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: #fff; white-space: nowrap; }
 .pendiente { background: #eab308; }
 .en_transito { background: #3b82f6; }
 .entregado { background: #22c55e; }
