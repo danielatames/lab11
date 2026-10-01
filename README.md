@@ -1,47 +1,20 @@
-# Laboratorio 10 — ExpresoFast Parte IV: Consola de Operación Logística
+## Laboratorio 11 — Preguntas teóricas
 
-**Curso:** IF0009 - Desarrollo de Software IV
-**Ciclo:** II-2026
-**Estudiante:** Daniela Tames Vega
-**Carné:** c5k177
+### 1. ¿Por qué usar FormArray en vez de 10 campos fijos ocultos?
 
+Con 10 campos fijos ocultos el formulario tiene un límite, carga campos que no se usan y obliga a repetir el mismo código 10 veces. Si se quiere agregar un campo nuevo, hay que cambiarlo en 10 lugares.
 
-## Requisitos de Entorno
-
-- Java 21
-- Maven (incluido como wrapper mvnw)
-- Microsoft SQL Server 
-- Navegador web moderno 
-- Servidor local para el front-end (Live Server)
+Con FormArray los paquetes se agregan o quitan según se necesiten, con un botón:
+- Mejor experiencia para el usuario: solo ve los campos que de verdad está usando, sin límites ni espacios vacíos.
+- Validación automática: cada paquete se valida solo, y el formulario completo sabe si todo está correcto.
 
 
-## Instrucciones de Ejecución
+### 2. ¿Cuál es la diferencia entre el validador de fechas y el de tracking?
 
-### Backend
+JavaScript hace una sola cosa a la vez. Las tareas que tardan, como esperar una respuesta de internet, se dejan en espera para que la página no se congele mientras tanto.
 
-1. Desde la carpeta backend/, ejecutá: .\mvnw.cmd spring-boot:run
-2. El backend queda disponible en `http://localhost:8080`.
+- Validador de fechas (síncrono):solo compara dos fechas que ya están en el formulario. La respuesta es inmediata, así que el error aparece al instante.
+- Validador de tracking (asíncrono): tiene que preguntarle al servidor si el número ya existe, y esa respuesta tarda. Mientras tanto, el campo queda en estado "pendiente" ("Verificando disponibilidad…"), el usuario puede seguir escribiendo y la página no se congela. Cuando llega la respuesta, el campo se marca como válido o con error.
 
-### Frontend
-
-1. Abrí la carpeta frontend/ con la extensión Live Server de VS Code
-2. Iniciá sesión con cualquiera de los usuarios de prueba.
-
-### Frontend Angular
-cd frontend-angular
-npm install
-npx ng serve
-(App en http://localhost:4200)
-
-
-## Usuarios de Prueba
-1. admin= admin123 
-2. operador1= oper123  
-3. conductor1= cond123 
-
-## Funcionalidad por Rol
-
-- ADMIN: ve la bitácora de auditorí, el indicador de vehículos activos,y el botón "Ver Bitácora" en cada envío.
-- OPERADOR: ve el tablero de envíos y sus acciones de estado, sin acceso a la bitácora.
-- CONDUCTOR: ve únicamente sus envíos y el botón para marcar como entregado.
-
+¿Por qué Angular pide un Observable o una Promise? 
+Porque la respuesta del servidor todavía no existe cuando la función termina. Un Observable es como una promesa de que la respuesta va a llegar, Angular espera ese resultado sin bloquear la página. 
