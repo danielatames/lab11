@@ -4,6 +4,7 @@ import cr.ac.ucr.paraiso.ie.c5k177.expresofast.data.*;
 import cr.ac.ucr.paraiso.ie.c5k177.expresofast.domain.*;
 import cr.ac.ucr.paraiso.ie.c5k177.expresofast.dto.*;
 import cr.ac.ucr.paraiso.ie.c5k177.expresofast.exception.CapacidadExcedidaException;
+import cr.ac.ucr.paraiso.ie.c5k177.expresofast.exception.DuplicateResourceException;
 import cr.ac.ucr.paraiso.ie.c5k177.expresofast.exception.InvalidStateTransitionException;
 import cr.ac.ucr.paraiso.ie.c5k177.expresofast.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -215,5 +217,56 @@ public class EnvioService {
                 envio.getCosto(),
                 envio.getEstadoEnvio(),
                 envio.getFechaCreacion());
+    }
+    
+    @Transactional
+    public EnvioResponseDTO registrarEnvioConPaquetes(EnvioRegistroDTO dto) {
+        String tracking = dto.getNumeroTracking().trim().toUpperCase();
+
+        
+        if (envioRepository.existsByCodigoRastreo(tracking)) {
+            throw new DuplicateResourceException("Este número de rastreo ya está en uso");
+        }
+
+        Vehiculo vehiculo = vehiculoRepository.findById(dto.getVehiculoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Vehículo no encontrado"));
+        Conductor conductor = conductorRepository.findById(dto.getConductorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Conductor no encontrado"));
+
+        BigDecimal pesoTotal = dto.getPaquetes().stream()
+                .map(PaqueteDTO::getPesoKg)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (pesoTotal.compareTo(vehiculo.getCapacidadKg()) > 0) {
+            throw new CapacidadExcedidaException("El peso total (" + pesoTotal
+                    + " kg) supera la capacidad del vehículo (" + vehiculo.getCapacidadKg() + " kg)");
+        }
+
+        Envio envio = new Envio();
+        envio.setCodigoRastreo(tracking);
+        envio.setDestinatario(dto.getDestinatario());
+        envio.setDireccionDestino(dto.getDireccionDestino());
+        envio.setCosto(dto.getMontoFlete());
+        envio.setPesoKg(pesoTotal);
+        envio.setFechaDespacho(dto.getFechaDespacho());
+        envio.setFechaEntregaEstimada(dto.getFechaEntregaEstimada());
+        envio.setVehiculo(vehiculo);
+        envio.setConductor(conductor);
+        envio.setEstadoEnvio("PENDIENTE");
+
+        for (PaqueteDTO p : dto.getPaquetes()) {
+            Paquete paquete = new Paquete();
+            paquete.setDescripcion(p.getDescripcion());
+            paquete.setPesoKg(p.getPesoKg());
+            envio.agregarPaquete(paquete);   // enlaza ambos lados
+        }
+
+        Envio guardado = envioRepository.save(envio);
+        return mapearAResponseDTO(guardado);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existeTracking(String numeroTracking) {
+        return envioRepository.existsByCodigoRastreo(numeroTracking.trim().toUpperCase());
     }
 }

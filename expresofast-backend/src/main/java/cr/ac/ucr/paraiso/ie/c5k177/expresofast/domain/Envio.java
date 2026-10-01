@@ -3,6 +3,9 @@ package cr.ac.ucr.paraiso.ie.c5k177.expresofast.domain;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Envio")
@@ -31,6 +34,12 @@ public class Envio extends AuditableEntity {
     @Column(name = "estado_envio", nullable = false, length = 20)
     private String estadoEnvio;
 
+    @Column(name = "fecha_despacho")
+    private LocalDate fechaDespacho;
+
+    @Column(name = "fecha_entrega_estimada")
+    private LocalDate fechaEntregaEstimada;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehiculo_id", nullable = false)
     private Vehiculo vehiculo;
@@ -39,75 +48,53 @@ public class Envio extends AuditableEntity {
     @JoinColumn(name = "conductor_id", nullable = false)
     private Conductor conductor;
 
-    public Integer getId() {
-        return id;
+   
+    @OneToMany(mappedBy = "envio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Paquete> paquetes = new ArrayList<>();
+
+    public void agregarPaquete(Paquete paquete) {
+        paquetes.add(paquete);
+        paquete.setEnvio(this);
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void quitarPaquete(Paquete paquete) {
+        paquetes.remove(paquete);
+        paquete.setEnvio(null);
     }
 
-    public String getCodigoRastreo() {
-        return codigoRastreo;
-    }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public void setCodigoRastreo(String codigoRastreo) {
-        this.codigoRastreo = codigoRastreo;
-    }
+    public String getCodigoRastreo() { return codigoRastreo; }
+    public void setCodigoRastreo(String codigoRastreo) { this.codigoRastreo = codigoRastreo; }
 
-    public String getDestinatario() {
-        return destinatario;
-    }
+    public String getDestinatario() { return destinatario; }
+    public void setDestinatario(String destinatario) { this.destinatario = destinatario; }
 
-    public void setDestinatario(String destinatario) {
-        this.destinatario = destinatario;
-    }
+    public String getDireccionDestino() { return direccionDestino; }
+    public void setDireccionDestino(String direccionDestino) { this.direccionDestino = direccionDestino; }
 
-    public String getDireccionDestino() {
-        return direccionDestino;
-    }
+    public BigDecimal getPesoKg() { return pesoKg; }
+    public void setPesoKg(BigDecimal pesoKg) { this.pesoKg = pesoKg; }
 
-    public void setDireccionDestino(String direccionDestino) {
-        this.direccionDestino = direccionDestino;
-    }
+    public BigDecimal getCosto() { return costo; }
+    public void setCosto(BigDecimal costo) { this.costo = costo; }
 
-    public BigDecimal getPesoKg() {
-        return pesoKg;
-    }
+    public String getEstadoEnvio() { return estadoEnvio; }
+    public void setEstadoEnvio(String estadoEnvio) { this.estadoEnvio = estadoEnvio; }
 
-    public void setPesoKg(BigDecimal pesoKg) {
-        this.pesoKg = pesoKg;
-    }
+    public LocalDate getFechaDespacho() { return fechaDespacho; }
+    public void setFechaDespacho(LocalDate fechaDespacho) { this.fechaDespacho = fechaDespacho; }
 
-    public BigDecimal getCosto() {
-        return costo;
-    }
+    public LocalDate getFechaEntregaEstimada() { return fechaEntregaEstimada; }
+    public void setFechaEntregaEstimada(LocalDate fechaEntregaEstimada) { this.fechaEntregaEstimada = fechaEntregaEstimada; }
 
-    public void setCosto(BigDecimal costo) {
-        this.costo = costo;
-    }
+    public Vehiculo getVehiculo() { return vehiculo; }
+    public void setVehiculo(Vehiculo vehiculo) { this.vehiculo = vehiculo; }
 
-    public String getEstadoEnvio() {
-        return estadoEnvio;
-    }
+    public Conductor getConductor() { return conductor; }
+    public void setConductor(Conductor conductor) { this.conductor = conductor; }
 
-    public void setEstadoEnvio(String estadoEnvio) {
-        this.estadoEnvio = estadoEnvio;
-    }
-
-    public Vehiculo getVehiculo() {
-        return vehiculo;
-    }
-
-    public void setVehiculo(Vehiculo vehiculo) {
-        this.vehiculo = vehiculo;
-    }
-
-    public Conductor getConductor() {
-        return conductor;
-    }
-
-    public void setConductor(Conductor conductor) {
-        this.conductor = conductor;
-    }
+    public List<Paquete> getPaquetes() { return paquetes; }
+    public void setPaquetes(List<Paquete> paquetes) { this.paquetes = paquetes; }
 }

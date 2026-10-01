@@ -81,4 +81,9 @@ public class GlobalExceptionHandler {
         respuesta.put("error", mensaje);
         return respuesta;
     }
+        @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<Map<String, Object>> manejarDuplicado(DuplicateResourceException ex) {
+        Map<String, Object> respuesta = construirRespuestaBase(HttpStatus.CONFLICT, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(respuesta);
+    }
 }

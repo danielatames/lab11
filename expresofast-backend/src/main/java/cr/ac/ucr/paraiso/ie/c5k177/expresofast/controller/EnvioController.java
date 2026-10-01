@@ -1,6 +1,7 @@
 package cr.ac.ucr.paraiso.ie.c5k177.expresofast.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import cr.ac.ucr.paraiso.ie.c5k177.expresofast.business.EnvioService;
 import cr.ac.ucr.paraiso.ie.c5k177.expresofast.dto.BitacoraResponseDTO;
 import cr.ac.ucr.paraiso.ie.c5k177.expresofast.dto.CambioEstadoDTO;
 import cr.ac.ucr.paraiso.ie.c5k177.expresofast.dto.EnvioDTO;
+import cr.ac.ucr.paraiso.ie.c5k177.expresofast.dto.EnvioRegistroDTO;
 import cr.ac.ucr.paraiso.ie.c5k177.expresofast.dto.EnvioRequestDTO;
 import cr.ac.ucr.paraiso.ie.c5k177.expresofast.dto.EnvioResponseDTO;
 import jakarta.validation.Valid;
@@ -86,5 +88,15 @@ public class EnvioController {
     @GetMapping("/api/envios/rastreo/{codigo}")
     public ResponseEntity<EnvioResponseDTO> obtenerPorCodigo(@PathVariable String codigo) {
         return ResponseEntity.ok(envioService.obtenerPorCodigo(codigo));
+    }
+     @PostMapping("/api/envios/avanzado")
+    public ResponseEntity<EnvioResponseDTO> registrarEnvioAvanzado(@Valid @RequestBody EnvioRegistroDTO dto) {
+        EnvioResponseDTO guardado = envioService.registrarEnvioConPaquetes(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
+    }
+
+    @GetMapping("/api/envios/check-tracking/{trackingNumber}")
+    public ResponseEntity<Map<String, Boolean>> checkTracking(@PathVariable String trackingNumber) {
+        return ResponseEntity.ok(Map.of("existe", envioService.existeTracking(trackingNumber)));
     }
 }

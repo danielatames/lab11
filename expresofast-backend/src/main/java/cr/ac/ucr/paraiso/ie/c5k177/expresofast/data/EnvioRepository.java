@@ -26,7 +26,8 @@ public interface EnvioRepository extends JpaRepository<Envio, Integer> {
         int actualizarEstadoPorVehiculo(@Param("vehiculoId") Integer vehiculoId, @Param("estado") String estado);
 
         java.util.Optional<Envio> findByCodigoRastreo(String codigoRastreo);
-
+        boolean existsByCodigoRastreo(String codigoRastreo);
+        
         @Procedure(procedureName = "SP_OBTENER_ENVIOS_POR_ESTADO")
         List<Envio> obtenerEnviosPorEstado(@Param("pEstado") String pEstado);
 
